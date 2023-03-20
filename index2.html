@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Rockwell Search</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap');
+    </style>
+  </head>
+  <body>
+    <h1>Motion Analyzer Search</h1>
+    <br>
+    <div>
+      <form>
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <input type="text" maxlength="1" />
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    <script>
+      let interval;
+
+      function init() {
+        const form = document.querySelector('form');
+        let button = document.querySelector('button[type="submit"]');
+
+        function openFile(filePath) {
+          window.location.href = "http://localhost:8000/open-url.php?file=" + filePath;
+        }
+
+        function setupSearch() {
+          button = document.querySelector('button[type="submit"]');
+          if (button) {
+            button.addEventListener('click', function(event) {
+              // Prevent the form from submitting
+              event.preventDefault();
+
+              // Get the code entered in the inputs
+              const inputs = form.querySelectorAll('input');
+              const userCode = [...inputs].map((input) => input.value).join('');
+
+              // Construct the path to the Internet shortcut file
+              const filePath = `C:\\Users\\shacosta\\Desktop\\RockwellSearch\\MotionAnalyzer\\${userCode}.url`;
+
+              // Send an HTTP request to the PHP file to check if the file exists
+              fetch(`http://localhost:8000/find-url.php?code=${userCode}`)
+                .then((response) => response.json())
+                .then((data) => {
+                  // If the file was found, open it
+                  if (data.found) {
+                    openFile(filePath);
+                  } else {
+                    // Show an error message if the file was not found
+                    alert('File not found');
+                  }
+                })
+                .catch((error) => {
+                  console.error(error);
+                  alert('An error occurred while searching for the file');
+                });
+            });
+
+            clearInterval(interval);
+          }
+        }
+
+        if (!button) {
+          interval = setInterval(setupSearch, 100);
+        } else {
+          setupSearch();
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+  </body>
+</html>
